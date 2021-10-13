@@ -11,5 +11,5 @@ $ cargo bootimage
 
 # Run on QEMU
 ```
-$ qemu-system-x86_64 -drive format=raw,file=target/x86_64-oos/debug/bootimage-oos.bin
+$ cargo run
 ```
