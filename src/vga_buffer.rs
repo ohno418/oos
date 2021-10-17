@@ -1,3 +1,4 @@
+use core::fmt;
 use volatile::Volatile;
 
 // The standard color palette in VGA text mode.
@@ -97,7 +98,15 @@ impl Writer {
     }
 }
 
+impl fmt::Write for Writer {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.write_string(s);
+        Ok(())
+    }
+}
+
 pub fn print_something() {
+    use core::fmt::Write;
     let mut writer = Writer {
         column_position: 0,
         color_code: ColorCode::new(Color::Pink, Color::LightGreen),
@@ -105,6 +114,6 @@ pub fn print_something() {
     };
 
     writer.write_byte(b'H');
-    writer.write_string("ello, ");
-    writer.write_string("oos!");
+    writer.write_string("ello! ");
+    write!(writer, "The number are {} and {}", 42, 1.0/3.0).unwrap();
 }
