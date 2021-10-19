@@ -93,7 +93,7 @@ impl Writer {
         }
     }
 
-    pub fn write_string(&mut self, s: &str) {
+    fn write_string(&mut self, s: &str) {
         for byte in s.bytes() {
             match byte {
                 // printable ASCII byte or newline
@@ -131,4 +131,23 @@ impl fmt::Write for Writer {
         self.write_string(s);
         Ok(())
     }
+}
+
+// === Macros to print to the VGA text buffer ===
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! println {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
+
+// This function needs to be public to use the macros above.
+#[doc(hidden)]
+pub fn _print(arg: fmt::Arguments) {
+    use core::fmt::Write;
+    WRITER.lock().write_fmt(arg).unwrap();
 }
