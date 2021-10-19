@@ -1,5 +1,16 @@
 use core::fmt;
+use lazy_static::lazy_static;
 use volatile::Volatile;
+use spin::Mutex;
+
+lazy_static! {
+    // A global `Writer` instance that can be used for printing to the VGA text buffer.
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
+        column_position: 0,
+        color_code: ColorCode::new(Color::Green, Color::Black),
+        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+    });
+}
 
 // The standard color palette in VGA text mode.
 #[allow(dead_code)]
@@ -120,17 +131,4 @@ impl fmt::Write for Writer {
         self.write_string(s);
         Ok(())
     }
-}
-
-pub fn print_something() {
-    use core::fmt::Write;
-    let mut writer = Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Pink, Color::LightGreen),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    };
-
-    writer.write_byte(b'H');
-    writer.write_string("ello, oos!\n");
-    write!(writer, "The number are {} and {}\nhi!", 42, 1.0/3.0).unwrap();
 }
